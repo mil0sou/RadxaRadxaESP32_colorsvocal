@@ -5,10 +5,10 @@ import ssd1306
 from umqtt.simple import MQTTClient
 import neopixel
 
-NUM_LEDS = 12
+NUM_LEDS = 64
 PIN = 3
 SSID = "milo "
-PASS = "jtedispas"
+PASS = "niryoned2"
 MQTT_BROKER = "192.168.225.167"
 CLIENT_ID = "esp32_test_sub"
 TOPIC = b"iot_whisper"
@@ -43,6 +43,7 @@ COLORS = {
     "sky":       (135, 206, 235),
     "rose":      (255, 50, 100),
     "off":       (0, 0, 0),
+    "black": (20, 20, 20),
 }
 
 BRIGHTNESS = 0.3
@@ -51,6 +52,155 @@ flash_mode = False
 flash_state = False
 rainbow_j = 0
 last_color = [(0, 0, 0)] * NUM_LEDS
+
+FLAGS = {
+    "brazil": [
+        # Fond vert
+        "green", "green", "green", "green", "green", "green", "green", "green",
+        "green", "green", "green", "yellow","yellow","green", "green", "green",
+        "green", "green", "yellow","yellow","yellow","yellow","green", "green",
+        "green", "yellow","yellow","blue", "blue", "yellow","yellow","green",
+        "green", "yellow","yellow","blue", "blue", "yellow","yellow","green",
+        "green", "green", "yellow","yellow","yellow","yellow","green", "green",
+        "green", "green", "green", "yellow","yellow","green", "green", "green",
+        "green", "green", "green", "green", "green", "green", "green", "green",
+    ],
+    "france": [
+        "blue","blue","blue","white","white","white","red","red",
+        "blue","blue","blue","white","white","white","red","red",
+        "blue","blue","blue","white","white","white","red","red",
+        "blue","blue","blue","white","white","white","red","red",
+        "blue","blue","blue","white","white","white","red","red",
+        "blue","blue","blue","white","white","white","red","red",
+        "blue","blue","blue","white","white","white","red","red",
+        "blue","blue","blue","white","white","white","red","red",
+    ],
+    "germany": [
+        "black","black","black","black","black","black","black","black",
+        "black","black","black","black","black","black","black","black",
+        "black","black","black","black","black","black","black","black",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "gold", "gold", "gold", "gold", "gold", "gold", "gold", "gold",
+        "gold", "gold", "gold", "gold", "gold", "gold", "gold", "gold",
+    ],
+    "italy": [
+        "green","green","green","white","white","red","red","red",
+        "green","green","green","white","white","red","red","red",
+        "green","green","green","white","white","red","red","red",
+        "green","green","green","white","white","red","red","red",
+        "green","green","green","white","white","red","red","red",
+        "green","green","green","white","white","red","red","red",
+        "green","green","green","white","white","red","red","red",
+        "green","green","green","white","white","red","red","red",
+    ],
+    "spain": [
+        "red",    "red",    "red",    "red",    "red",    "red",    "red",    "red",
+        "red",    "red",    "red",    "red",    "red",    "red",    "red",    "red",
+        "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow",
+        "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow",
+        "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow",
+        "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow", "yellow",
+        "red",    "red",    "red",    "red",    "red",    "red",    "red",    "red",
+        "red",    "red",    "red",    "red",    "red",    "red",    "red",    "red",
+    ],
+    "japan": [
+        "white","white","white","white","white","white","white","white",
+        "white","white","white","white","white","white","white","white",
+        "white","white","red",  "red",  "red",  "white","white","white",
+        "white","red",  "red",  "red",  "red",  "red",  "white","white",
+        "white","red",  "red",  "red",  "red",  "red",  "white","white",
+        "white","white","red",  "red",  "red",  "white","white","white",
+        "white","white","white","white","white","white","white","white",
+        "white","white","white","white","white","white","white","white",
+    ],
+    "china": [
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "yellow","red", "yellow","red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        ],
+    "korea": [
+        "white","white","white","white","white","white","white","white",
+        "white","black","white","white","white","black","white","white",
+        "white","white","red",  "blue", "red",  "white","white","white",
+        "white","white","blue", "red",  "blue", "white","white","white",
+        "white","white","red",  "blue", "red",  "white","white","white",
+        "white","black","white","white","white","black","white","white",
+        "white","white","white","white","white","white","white","white",
+        "white","white","white","white","white","white","white","white",
+    ],
+    "turkey": [
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "white","white","red",  "red",  "yellow","red",  "red",
+        "white","red",  "white","white","red",  "red",  "red",  "red",
+        "white","red",  "white","white","red",  "yellow","red",  "red",
+        "red",  "white","white","red",  "red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+    ],
+    "mauritius": [
+        "red",   "red",   "red",   "red",   "red",   "red",   "red",   "red",
+        "red",   "red",   "red",   "red",   "red",   "red",   "red",   "red",
+        "blue",  "blue",  "blue",  "blue",  "blue",  "blue",  "blue",  "blue",
+        "blue",  "blue",  "blue",  "blue",  "blue",  "blue",  "blue",  "blue",
+        "yellow","yellow","yellow","yellow","yellow","yellow","yellow","yellow",
+        "yellow","yellow","yellow","yellow","yellow","yellow","yellow","yellow",
+        "green", "green", "green", "green", "green", "green", "green", "green",
+        "green", "green", "green", "green", "green", "green", "green", "green",
+    ],
+    "uk": [
+        "blue", "blue", "white","red",  "red",  "white","blue", "blue",
+        "blue", "white","white","red",  "red",  "white","white","blue",
+        "white","white","red",  "red",  "red",  "red",  "white","white",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "white","white","red",  "red",  "red",  "red",  "white","white",
+        "blue", "white","white","red",  "red",  "white","white","blue",
+        "blue", "blue", "white","red",  "red",  "white","blue", "blue",
+    ],
+    "morocco": [
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "green","red",  "red",  "red",  "red",
+        "red",  "red",  "green","green","green","red",  "red",  "red",
+        "red",  "green","red",  "green","red",  "green","red",  "red",
+        "red",  "red",  "red",  "green","red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+        "red",  "red",  "red",  "red",  "red",  "red",  "red",  "red",
+    ],
+    "scotland": [
+        "white","blue", "blue", "blue", "blue", "blue", "blue", "white",
+        "blue", "white","blue", "blue", "blue", "blue", "white","blue",
+        "blue", "blue", "white","blue", "blue", "white","blue", "blue",
+        "blue", "blue", "blue", "white","white","blue", "blue", "blue",
+        "blue", "blue", "blue", "white","white","blue", "blue", "blue",
+        "blue", "blue", "white","blue", "blue", "white","blue", "blue",
+        "blue", "white","blue", "blue", "blue", "blue", "white","blue",
+        "white","blue", "blue", "blue", "blue", "blue", "blue", "white",
+    ],
+}
+
+def draw_flag(flag_name):
+    global rainbow_mode, flash_mode, last_color
+    rainbow_mode = False
+    flash_mode = False
+    pattern = FLAGS.get(flag_name)
+    if not pattern:
+        return False
+    for i, color_name in enumerate(pattern):
+        r, g, b = COLORS.get(color_name, (0, 0, 0))
+        dimmed = (int(r*BRIGHTNESS), int(g*BRIGHTNESS), int(b*BRIGHTNESS))
+        np[i] = dimmed
+        last_color[i] = dimmed
+    np.write()
+    return True
 
 def set_color(rgb):
     global last_color
@@ -127,6 +277,11 @@ def find_colour(msg):
     msg = msg.decode() if isinstance(msg, bytes) else msg
     lower = msg.lower()
 
+    for flag_name in FLAGS:
+        if flag_name in lower:
+            draw_flag(flag_name)
+            return  
+
     if "rainbow" in lower:
         rainbow_mode = True
         flash_mode = False
@@ -149,10 +304,8 @@ def find_colour(msg):
         word = ''.join(c for c in word if c.isalpha())
         if word in COLORS and COLORS[word] not in found:
             found.append(COLORS[word])
-
     if not found:
         return
-
     segment = NUM_LEDS // len(found)
     for i in range(NUM_LEDS):
         r, g, b = found[i // segment] if i // segment < len(found) else found[-1]
